@@ -1,0 +1,17 @@
+resource_group_name = "Iva-RG"
+location            = "westeurope"
+student_email       = "ibagaric@algebra.hr"
+
+allowed_jump_source_ips = [
+  "86.32.106.32/32"
+]
+
+jump_admin_username = "azurelabadminiva"
+jump_admin_password = "Replace-With-Strong-Password-123!"
+
+postgres_entra_admin_upn = "iva.bagaric@infigo.is"
+
+app_gateway_certificate_password = "Replace-With-Cert-Password-123!"
+
+bootstrap_public_access = true
+acr_sku                 = "Premium"

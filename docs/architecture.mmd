@@ -1,0 +1,37 @@
+flowchart LR
+  Internet["Internet / approved IP"] --> JumpPip["Public IP: Jump VM"]
+  Internet --> AppGwPip["Public IP: Application Gateway"]
+
+  subgraph JumpVNet["Jump VNet 10.10.0.0/16"]
+    JumpVm["Windows Jump VM"]
+  end
+
+  subgraph AppVNet["Application VNet 10.20.0.0/16"]
+    AppGw["Application Gateway\nHTTPS\n/aks and /functionap"]
+    AKS["Private AKS cluster"]
+    Function["Function App\nPrivate Endpoint"]
+    Postgres["PostgreSQL Flexible Server\nPrivate delegated subnet"]
+    Storage["Storage Account\nBlob + File"]
+    KV["Key Vault\nSecrets + Certificate"]
+    ACR["Container Registry\nPrivate Endpoint"]
+    LAW["Log Analytics\nWorkbook"]
+  end
+
+  JumpPip --> JumpVm
+  AppGwPip --> AppGw
+  JumpVm <--> AppVNet
+  AppGw --> AKS
+  AppGw --> Function
+  AKS --> ACR
+  AKS --> Storage
+  AKS --> KV
+  JumpVm --> Postgres
+  JumpVm --> Storage
+  JumpVm --> KV
+  JumpVm --> AKS
+  AKS --> LAW
+  JumpVm --> LAW
+  Storage --> LAW
+  KV --> LAW
+  Postgres --> LAW
+

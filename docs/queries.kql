@@ -1,0 +1,36 @@
+// Windows security events from the jump VM
+Event
+| where TimeGenerated > ago(24h)
+| where EventLog == "Security"
+| summarize Count = count() by EventID, Activity
+| order by Count desc
+
+// AKS container logs
+ContainerLogV2
+| where TimeGenerated > ago(24h)
+| summarize Count = count() by PodNamespace, PodName, ContainerName
+| order by Count desc
+
+// Storage blob and Key Vault access
+AzureDiagnostics
+| where TimeGenerated > ago(24h)
+| where ResourceProvider in ("MICROSOFT.KEYVAULT", "MICROSOFT.STORAGE")
+| summarize Count = count() by ResourceProvider, OperationName, ResultType
+| order by Count desc
+
+// Application Gateway requests
+AzureDiagnostics
+| where TimeGenerated > ago(24h)
+| where ResourceProvider == "MICROSOFT.NETWORK"
+| where Category == "ApplicationGatewayAccessLog"
+| summarize Count = count() by requestUri_s, httpStatus_d
+| order by Count desc
+
+// Jump VM CPU usage
+Perf
+| where TimeGenerated > ago(24h)
+| where ObjectName == "Processor"
+| where CounterName == "% Processor Time"
+| summarize AvgCpu = avg(CounterValue) by bin(TimeGenerated, 5m), Computer
+| render timechart
+

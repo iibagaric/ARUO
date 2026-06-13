@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aks-sample
+  namespace: sample
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aks-sample
+  template:
+    metadata:
+      labels:
+        app: aks-sample
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: sample-workload-sa
+      containers:
+        - name: aks-sample
+          image: ${ACR_LOGIN_SERVER}/aks-sample:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
