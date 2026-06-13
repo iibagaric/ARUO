@@ -87,3 +87,9 @@ variable "bootstrap_public_access" {
   description = "Keep selected services public during first deployment so Cloud Shell can upload artifacts. Run lockdown script after app deployment."
   default     = true
 }
+
+variable "enable_file_sync" {
+  type        = bool
+  description = "Create Azure File Sync resources. Set to false if Microsoft.StorageSync is not registered in the lab subscription."
+  default     = true
+}

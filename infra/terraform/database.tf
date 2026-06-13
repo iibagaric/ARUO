@@ -1,7 +1,7 @@
 resource "azurerm_postgresql_flexible_server" "main" {
   name                          = "pg-${local.name}"
   resource_group_name           = data.azurerm_resource_group.main.name
-  location                      = data.azurerm_resource_group.main.location
+  location                      = var.location
   version                       = "16"
   delegated_subnet_id           = azurerm_subnet.postgres.id
   private_dns_zone_id           = azurerm_private_dns_zone.postgres.id
@@ -34,4 +34,5 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "ma
   principal_name      = var.postgres_entra_admin_upn
   principal_type      = "User"
 }
+
 

@@ -1,6 +1,6 @@
 resource "azurerm_key_vault" "main" {
   name                          = "kv-${local.name}"
-  location                      = data.azurerm_resource_group.main.location
+  location                      = var.location
   resource_group_name           = data.azurerm_resource_group.main.name
   tenant_id                     = data.azurerm_client_config.current.tenant_id
   sku_name                      = "standard"
@@ -13,7 +13,7 @@ resource "azurerm_key_vault" "main" {
 
 resource "azurerm_private_endpoint" "key_vault" {
   name                = "pe-${local.name}-kv"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   subnet_id           = azurerm_subnet.private_endpoints.id
   tags                = local.common_tags
@@ -76,4 +76,5 @@ resource "azurerm_role_assignment" "appgw_key_vault_certificates" {
   role_definition_name = "Key Vault Certificate User"
   principal_id         = azurerm_user_assigned_identity.app_gateway.principal_id
 }
+
 

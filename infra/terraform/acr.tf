@@ -1,7 +1,7 @@
 resource "azurerm_container_registry" "main" {
   name                          = "acr${replace(local.name, "-", "")}"
   resource_group_name           = data.azurerm_resource_group.main.name
-  location                      = data.azurerm_resource_group.main.location
+  location                      = var.location
   sku                           = var.acr_sku
   admin_enabled                 = false
   public_network_access_enabled = var.bootstrap_public_access
@@ -10,7 +10,7 @@ resource "azurerm_container_registry" "main" {
 
 resource "azurerm_private_endpoint" "acr" {
   name                = "pe-${local.name}-acr"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   subnet_id           = azurerm_subnet.private_endpoints.id
   tags                = local.common_tags
@@ -33,4 +33,5 @@ resource "azurerm_role_assignment" "acr_pull_workload" {
   role_definition_name = "AcrPull"
   principal_id         = azurerm_user_assigned_identity.workload.principal_id
 }
+
 

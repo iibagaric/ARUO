@@ -3,7 +3,7 @@ output "resource_group_name" {
 }
 
 output "location" {
-  value = data.azurerm_resource_group.main.location
+  value = var.location
 }
 
 output "jump_public_ip" {
@@ -49,4 +49,5 @@ output "postgres_fqdn" {
 output "log_analytics_workspace_name" {
   value = azurerm_log_analytics_workspace.main.name
 }
+
 

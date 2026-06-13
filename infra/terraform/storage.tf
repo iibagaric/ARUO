@@ -1,7 +1,7 @@
 resource "azurerm_storage_account" "main" {
   name                            = "st${replace(local.name, "-", "")}"
   resource_group_name             = data.azurerm_resource_group.main.name
-  location                        = data.azurerm_resource_group.main.location
+  location                        = var.location
   account_tier                    = "Standard"
   account_replication_type        = "LRS"
   account_kind                    = "StorageV2"
@@ -37,7 +37,7 @@ resource "azurerm_storage_share" "onprem_sync" {
 
 resource "azurerm_private_endpoint" "blob" {
   name                = "pe-${local.name}-blob"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   subnet_id           = azurerm_subnet.private_endpoints.id
   tags                = local.common_tags
@@ -57,7 +57,7 @@ resource "azurerm_private_endpoint" "blob" {
 
 resource "azurerm_private_endpoint" "file" {
   name                = "pe-${local.name}-file"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   subnet_id           = azurerm_subnet.private_endpoints.id
   tags                = local.common_tags
@@ -76,20 +76,23 @@ resource "azurerm_private_endpoint" "file" {
 }
 
 resource "azurerm_storage_sync" "main" {
+  count               = var.enable_file_sync ? 1 : 0
   name                = "sync-${local.name}"
   resource_group_name = data.azurerm_resource_group.main.name
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   tags                = local.common_tags
 }
 
 resource "azurerm_storage_sync_group" "main" {
+  count           = var.enable_file_sync ? 1 : 0
   name            = "sync-group-onprem"
-  storage_sync_id = azurerm_storage_sync.main.id
+  storage_sync_id = azurerm_storage_sync.main[0].id
 }
 
 resource "azurerm_storage_sync_cloud_endpoint" "main" {
+  count                 = var.enable_file_sync ? 1 : 0
   name                  = "cloud-endpoint-onprem"
-  storage_sync_group_id = azurerm_storage_sync_group.main.id
+  storage_sync_group_id = azurerm_storage_sync_group.main[0].id
   file_share_name       = azurerm_storage_share.onprem_sync.name
   storage_account_id    = azurerm_storage_account.main.id
 }
@@ -105,4 +108,6 @@ resource "azurerm_role_assignment" "workload_file" {
   role_definition_name = "Storage File Data SMB Share Contributor"
   principal_id         = azurerm_user_assigned_identity.workload.principal_id
 }
+
+
 

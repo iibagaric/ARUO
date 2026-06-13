@@ -1,6 +1,6 @@
 resource "azurerm_log_analytics_workspace" "main" {
   name                = "law-${local.name}"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   sku                 = "PerGB2018"
   retention_in_days   = 30
@@ -9,7 +9,7 @@ resource "azurerm_log_analytics_workspace" "main" {
 
 resource "azurerm_monitor_data_collection_rule" "vm_security" {
   name                = "dcr-${local.name}-vm-security"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   tags                = local.common_tags
 
@@ -133,9 +133,9 @@ resource "azurerm_monitor_diagnostic_setting" "postgres" {
 resource "azurerm_application_insights_workbook" "main" {
   name                = random_uuid.workbook.result
   resource_group_name = data.azurerm_resource_group.main.name
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   display_name        = "ARUO monitoring workbook"
-  source_id           = azurerm_log_analytics_workspace.main.id
+  source_id           = lower(azurerm_log_analytics_workspace.main.id)
   category            = "workbook"
   tags                = local.common_tags
 
@@ -191,4 +191,6 @@ resource "azurerm_application_insights_workbook" "main" {
     ]
   })
 }
+
+
 

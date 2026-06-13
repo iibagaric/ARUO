@@ -1,6 +1,6 @@
 resource "azurerm_virtual_network" "app" {
   name                = "vnet-${local.name}-app"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   address_space       = ["10.20.0.0/16"]
   tags                = local.common_tags
@@ -8,7 +8,7 @@ resource "azurerm_virtual_network" "app" {
 
 resource "azurerm_virtual_network" "jump" {
   name                = "vnet-${local.name}-jump"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   address_space       = ["10.10.0.0/16"]
   tags                = local.common_tags
@@ -45,11 +45,11 @@ resource "azurerm_subnet" "function_integration" {
 }
 
 resource "azurerm_subnet" "private_endpoints" {
-  name                                      = "snet-private-endpoints"
-  resource_group_name                       = data.azurerm_resource_group.main.name
-  virtual_network_name                      = azurerm_virtual_network.app.name
-  address_prefixes                          = ["10.20.4.0/24"]
-  private_endpoint_network_policies_enabled = false
+  name                              = "snet-private-endpoints"
+  resource_group_name               = data.azurerm_resource_group.main.name
+  virtual_network_name              = azurerm_virtual_network.app.name
+  address_prefixes                  = ["10.20.4.0/24"]
+  private_endpoint_network_policies = "Disabled"
 }
 
 resource "azurerm_subnet" "postgres" {
@@ -77,7 +77,7 @@ resource "azurerm_subnet" "jump" {
 
 resource "azurerm_network_security_group" "jump" {
   name                = "nsg-${local.name}-jump"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   tags                = local.common_tags
 
@@ -198,4 +198,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "jump" {
   registration_enabled  = false
   tags                  = local.common_tags
 }
+
+
 

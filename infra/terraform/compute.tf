@@ -1,6 +1,6 @@
 resource "azurerm_public_ip" "jump" {
   name                = "pip-${local.name}-jump"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   allocation_method   = "Static"
   sku                 = "Standard"
@@ -9,7 +9,7 @@ resource "azurerm_public_ip" "jump" {
 
 resource "azurerm_network_interface" "jump" {
   name                = "nic-${local.name}-jump"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   tags                = local.common_tags
 
@@ -22,17 +22,17 @@ resource "azurerm_network_interface" "jump" {
 }
 
 resource "azurerm_windows_virtual_machine" "jump" {
-  name                     = "vm${local.suffix}jump"
-  resource_group_name      = data.azurerm_resource_group.main.name
-  location                 = data.azurerm_resource_group.main.location
-  size                     = var.jump_vm_size
-  admin_username           = var.jump_admin_username
-  admin_password           = var.jump_admin_password
-  network_interface_ids    = [azurerm_network_interface.jump.id]
-  patch_mode               = "AutomaticByPlatform"
-  provision_vm_agent       = true
-  enable_automatic_updates = true
-  tags                     = local.common_tags
+  name                      = "vm${local.suffix}jump"
+  resource_group_name       = data.azurerm_resource_group.main.name
+  location                  = var.location
+  size                      = var.jump_vm_size
+  admin_username            = var.jump_admin_username
+  admin_password            = var.jump_admin_password
+  network_interface_ids     = [azurerm_network_interface.jump.id]
+  patch_mode                = "AutomaticByPlatform"
+  provision_vm_agent        = true
+  automatic_updates_enabled = true
+  tags                      = local.common_tags
 
   os_disk {
     caching              = "ReadWrite"
@@ -50,7 +50,7 @@ resource "azurerm_windows_virtual_machine" "jump" {
 resource "azurerm_storage_account" "function" {
   name                            = "func${replace(local.name, "-", "")}"
   resource_group_name             = data.azurerm_resource_group.main.name
-  location                        = data.azurerm_resource_group.main.location
+  location                        = var.location
   account_tier                    = "Standard"
   account_replication_type        = "LRS"
   min_tls_version                 = "TLS1_2"
@@ -61,7 +61,7 @@ resource "azurerm_storage_account" "function" {
 resource "azurerm_service_plan" "function" {
   name                = "asp-${local.name}-function"
   resource_group_name = data.azurerm_resource_group.main.name
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   os_type             = "Linux"
   sku_name            = "B1"
   tags                = local.common_tags
@@ -70,7 +70,7 @@ resource "azurerm_service_plan" "function" {
 resource "azurerm_linux_function_app" "main" {
   name                          = "func-${local.name}"
   resource_group_name           = data.azurerm_resource_group.main.name
-  location                      = data.azurerm_resource_group.main.location
+  location                      = var.location
   service_plan_id               = azurerm_service_plan.function.id
   storage_account_name          = azurerm_storage_account.function.name
   storage_account_access_key    = azurerm_storage_account.function.primary_access_key
@@ -101,7 +101,7 @@ resource "azurerm_linux_function_app" "main" {
 
 resource "azurerm_private_endpoint" "function" {
   name                = "pe-${local.name}-function"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   subnet_id           = azurerm_subnet.private_endpoints.id
   tags                = local.common_tags
@@ -121,7 +121,7 @@ resource "azurerm_private_endpoint" "function" {
 
 resource "azurerm_public_ip" "app_gateway" {
   name                = "pip-${local.name}-appgw"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   allocation_method   = "Static"
   sku                 = "Standard"
@@ -130,7 +130,7 @@ resource "azurerm_public_ip" "app_gateway" {
 
 resource "azurerm_application_gateway" "main" {
   name                = "agw-${local.name}"
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   tags                = local.common_tags
 
@@ -217,15 +217,15 @@ resource "azurerm_application_gateway" "main" {
 
 resource "azurerm_kubernetes_cluster" "aks" {
   name                      = "aks-${local.name}"
-  location                  = data.azurerm_resource_group.main.location
+  location                  = var.location
   resource_group_name       = data.azurerm_resource_group.main.name
   dns_prefix                = "aks-${local.name}"
   private_cluster_enabled   = true
   private_dns_zone_id       = azurerm_private_dns_zone.aks.id
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
-  automatic_channel_upgrade = "patch"
-  node_os_channel_upgrade   = "NodeImage"
+  automatic_upgrade_channel = "patch"
+  node_os_upgrade_channel   = "NodeImage"
   sku_tier                  = "Standard"
   tags                      = local.common_tags
 
@@ -297,4 +297,18 @@ resource "azurerm_federated_identity_credential" "workload" {
   issuer              = azurerm_kubernetes_cluster.aks.oidc_issuer_url
   parent_id           = azurerm_user_assigned_identity.workload.id
   subject             = "system:serviceaccount:sample:sample-workload-sa"
+}
+
+
+
+resource "azurerm_role_assignment" "agic_appgw_identity_operator" {
+  scope                = azurerm_user_assigned_identity.app_gateway.id
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = azurerm_kubernetes_cluster.aks.ingress_application_gateway[0].ingress_application_gateway_identity[0].object_id
+}
+
+resource "azurerm_role_assignment" "agic_network_contributor" {
+  scope                = azurerm_virtual_network.app.id
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_kubernetes_cluster.aks.ingress_application_gateway[0].ingress_application_gateway_identity[0].object_id
 }
