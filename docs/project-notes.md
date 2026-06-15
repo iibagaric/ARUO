@@ -8,7 +8,7 @@ The project deploys a secure Azure environment for a multi-container application
 
 ## 2. Introduction
 
-The environment is deployed with Terraform into the existing resource group `Iva-RG` in West Europe. Public exposure is limited to the jump VM and Application Gateway. Other platform services are accessed privately after bootstrap lockdown.
+The environment is deployed with Terraform into the existing resource group `Iva-RG` in North Europe. Public exposure is limited to the jump VM and Application Gateway. Other platform services are accessed privately after bootstrap lockdown. North Europe was used because PostgreSQL Flexible Server provisioning was restricted in West Europe for the available subscription.
 
 ## 3. Cloud Object Management
 
@@ -20,19 +20,15 @@ Terraform files are stored in `infra/terraform`. Deployment is performed with `s
 
 The Mermaid diagram is stored in `docs/architecture.mmd`.
 
-### 3.3 Azure Portal walkthrough
-
-Record a walkthrough showing the resource group, networking, identities, Key Vault, AKS, Function App, PostgreSQL, Storage, ACR, Application Gateway, Log Analytics, and Workbook.
-
-### 3.4 Resources listed by Azure CLI
+### 3.3 Resources listed by Azure CLI
 
 Use `scripts/07-collect-evidence-cli.ps1`.
 
-### 3.5 Resources listed by Python
+### 3.4 Resources listed by Python
 
 Use `scripts/08-list-resources.py`.
 
-### 3.6 Tags
+### 3.5 Tags
 
 Required tags:
 
@@ -62,7 +58,7 @@ The solution uses user-assigned managed identities and least-privilege RBAC:
 
 - Storage account with blob container and Azure Files share.
 - Private endpoints for blob and file.
-- Azure File Sync service, sync group, and cloud endpoint.
+- Azure Files share. Azure File Sync resources are optional and controlled by `enable_file_sync`; this was set to `false` in the lab because `Microsoft.StorageSync` was not registered and could not be registered by the account.
 - PostgreSQL Flexible Server with private networking and automated backup retention.
 
 ## 7. Advanced Virtual Network Management

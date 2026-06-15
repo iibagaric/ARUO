@@ -89,7 +89,7 @@ resource "azurerm_linux_function_app" "main" {
     vnet_route_all_enabled = true
 
     application_stack {
-      node_version = "20"
+      node_version = "24"
     }
   }
 

@@ -1,5 +1,5 @@
 resource_group_name = "Iva-RG"
-location            = "westeurope"
+location            = "northeurope"
 student_email       = "ibagaric@algebra.hr"
 
 allowed_jump_source_ips = [
@@ -15,3 +15,4 @@ app_gateway_certificate_password = "Replace-With-Cert-Password-123!"
 
 bootstrap_public_access = true
 acr_sku                 = "Premium"
+enable_file_sync        = false

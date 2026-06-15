@@ -6,12 +6,13 @@ Infrastructure as Code project for a secure Azure application environment in the
 
 - Subscription: Microsoft Partner Network
 - Resource group: `Iva-RG`
-- Region: `westeurope`
+- Region: `northeurope`
 - Student tag: `ibagaric@algebra.hr`
 - Jump VM allowed public IP: `86.32.106.32/32`
 - PostgreSQL Entra administrator UPN: `iva.bagaric@infigo.is`
 - Container build method: `az acr build`
 - Jump VM admin username in the sample variables: `azurelabadminiva`
+- Azure account used for deployment: `iva.bagaric@infigo.is`
 
 ## Repository Structure
 
@@ -88,5 +89,8 @@ Run these commands from Azure Cloud Shell or another terminal where Azure CLI, T
 ## Important Notes
 
 - Azure Container Registry Private Link requires Premium SKU. This project uses Premium by default so AKS can pull images privately after bootstrap.
+- PostgreSQL Flexible Server was deployed in North Europe because the subscription was restricted from provisioning PostgreSQL Flexible Server in West Europe.
+- Azure File Sync resources are controlled by `enable_file_sync`. The sample variables set it to `false` because the lab subscription did not have the `Microsoft.StorageSync` provider registered and the account could not register subscription-level providers.
+- The Function App uses Node 24 because Node 20 reached end of life and was not used in the final deployment.
 - Some services are temporarily public during bootstrap because Cloud Shell must upload packages, images, and certificates. The lockdown script disables public access after deployment.
 - Do not commit `terraform.tfvars`, certificates, state files, or evidence outputs.

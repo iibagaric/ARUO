@@ -7,7 +7,7 @@ variable "resource_group_name" {
 variable "location" {
   type        = string
   description = "Azure region."
-  default     = "westeurope"
+  default     = "northeurope"
 }
 
 variable "project" {
@@ -91,5 +91,5 @@ variable "bootstrap_public_access" {
 variable "enable_file_sync" {
   type        = bool
   description = "Create Azure File Sync resources. Set to false if Microsoft.StorageSync is not registered in the lab subscription."
-  default     = true
+  default     = false
 }
