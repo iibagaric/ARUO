@@ -18,11 +18,16 @@ Infrastructure as Code project for a secure Azure application environment in the
 
 ```text
 infra/terraform   Terraform infrastructure
+infra/ARUO-project-ibagaric.docx
+                  Final project documentation
+infra/video       Final project walkthrough video
 app/aks           Sample container app and Kubernetes manifests
 app/function      Sample Azure Function code
 scripts           Deployment, evidence, and shutdown scripts
 docs              Project documentation, diagrams, and Kusto queries
 ```
+
+The final deliverables are grouped under `infra`, following the same submission pattern as the reference repository: implementation files are kept with the infrastructure folder, while the recorded walkthrough is placed in `infra/video`.
 
 ## Deployment Flow
 
