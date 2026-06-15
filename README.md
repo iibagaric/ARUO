@@ -43,7 +43,7 @@ The environment includes:
 - Windows jump VM in a separate virtual network
 - Log Analytics Workspace and monitoring workbook
 - Private endpoints and private DNS zones for protected services
-- 
+
 Application Gateway exposes two application paths:
 
 - /aks routes to the sample application deployed on AKS
